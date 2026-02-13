@@ -19,8 +19,26 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Endoscam',
-  description: 'Management of endoscope maintenance service orders.',
+  title: {
+    default: 'Endoscam - Gestão de Serviços',
+    template: '%s | Endoscam',
+  },
+  description: 'Painel de controle de serviços da Endoscam. Gestão eficiente de ordens de serviço e manutenção de equipamentos endoscópicos.',
+  openGraph: {
+    title: 'Endoscam - Gestão de Serviços',
+    description: 'Painel de controle de serviços da Endoscam. Gestão eficiente de ordens de serviço e manutenção de equipamentos endoscópicos.',
+    type: 'website',
+    locale: 'pt_BR',
+    siteName: 'Endoscam',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Endoscam - Gestão de Serviços',
+    description: 'Painel de controle de serviços da Endoscam. Gestão eficiente de ordens de serviço e manutenção.',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${ptSans.variable} ${poppins.variable} font-body antialiased`}>
         <ThemeProvider
           attribute="class"
