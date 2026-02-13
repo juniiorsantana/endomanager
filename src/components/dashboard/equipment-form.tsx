@@ -7,29 +7,29 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "../ui/textarea";
 import { Separator } from "../ui/separator";
@@ -60,22 +60,22 @@ const availabilityOptions = {
 };
 
 const formSchema = z.object({
-  ownerId: z.string({ required_error: "Selecione o cliente proprietário." }),
-  serialNumber: z.string().min(1, { message: "O nº de série é obrigatório." }),
-  brand: z.string().min(1, { message: "A marca é obrigatória." }),
-  model: z.string().min(1, { message: "O modelo é obrigatório." }),
-  equipmentType: z.string({ required_error: "Selecione o tipo de equipamento." }),
-  technicalObservations: z.string().optional(),
-  availabilityType: z.enum(['internal', 'sale', 'rent']),
-  technicalStatus: z.string({ required_error: "Selecione o status técnico." }),
-  // Commercial fields - sale
-  salePrice: z.coerce.number().optional(),
-  saleStatus: z.enum(['available', 'sold']).optional(),
-  // Commercial fields - rent
-  rentPriceDaily: z.coerce.number().optional(),
-  rentPriceWeekly: z.coerce.number().optional(),
-  rentPriceMonthly: z.coerce.number().optional(),
-  rentalStatus: z.enum(['available', 'rented']).optional(),
+    ownerId: z.string({ required_error: "Selecione o cliente proprietário." }),
+    serialNumber: z.string().min(1, { message: "O nº de série é obrigatório." }),
+    brand: z.string().min(1, { message: "A marca é obrigatória." }),
+    model: z.string().min(1, { message: "O modelo é obrigatório." }),
+    equipmentType: z.string({ required_error: "Selecione o tipo de equipamento." }),
+    technicalObservations: z.string().optional(),
+    availabilityType: z.enum(['internal', 'sale', 'rent']),
+    technicalStatus: z.string({ required_error: "Selecione o status técnico." }),
+    // Commercial fields - sale
+    salePrice: z.coerce.number().optional(),
+    saleStatus: z.enum(['available', 'sold']).optional(),
+    // Commercial fields - rent
+    rentPriceDaily: z.coerce.number().optional(),
+    rentPriceWeekly: z.coerce.number().optional(),
+    rentPriceMonthly: z.coerce.number().optional(),
+    rentalStatus: z.enum(['available', 'rented']).optional(),
 });
 
 interface EquipmentFormProps {
@@ -101,7 +101,7 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                 setClients(clientsData);
             } catch (error) {
                 console.error("Failed to fetch clients:", error);
-                 toast({
+                toast({
                     variant: "destructive",
                     title: "Erro ao buscar clientes",
                     description: "Não foi possível carregar a lista de clientes.",
@@ -132,17 +132,17 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
         },
     });
 
-     const availabilityType = form.watch("availabilityType");
+    const availabilityType = form.watch("availabilityType");
 
     const processSubmit = async (values: z.infer<typeof formSchema>): Promise<Equipment> => {
         setIsSubmitting(true);
         try {
             const newEquipmentData: Omit<Equipment, 'id'> = {
-                ...values,
+                ...(values as any),
                 rentalPrice: {
-                    daily: values.rentPriceDaily,
-                    weekly: values.rentPriceWeekly,
-                    monthly: values.rentPriceMonthly,
+                    daily: values.rentPriceDaily || 0,
+                    weekly: values.rentPriceWeekly || 0,
+                    monthly: values.rentPriceMonthly || 0,
                 }
             };
             const savedEquipment = await saveEquipment(newEquipmentData);
@@ -153,7 +153,7 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
     }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-       try {
+        try {
             const savedEquipment = await processSubmit(values);
             if (isModal && onSave) {
                 onSave(savedEquipment);
@@ -164,13 +164,13 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                 });
                 router.push("/dashboard/equipment");
             }
-       } catch (error) {
-             toast({
+        } catch (error) {
+            toast({
                 variant: "destructive",
                 title: "Erro ao Salvar",
                 description: "Não foi possível salvar o equipamento. Tente novamente.",
             });
-       }
+        }
     }
 
     const handleSaveAndCreateOS = async () => {
@@ -182,14 +182,14 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                 setNewlyCreatedEquipment(savedEquipment);
                 setIsOrderModalOpen(true);
             } catch (error) {
-                 toast({
+                toast({
                     variant: "destructive",
                     title: "Erro ao Salvar",
                     description: "Não foi possível salvar o equipamento antes de criar a OS.",
                 });
             }
         } else {
-             toast({
+            toast({
                 variant: "destructive",
                 title: "Erro de Validação",
                 description: "Por favor, preencha todos os campos obrigatórios.",
@@ -198,7 +198,7 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
     }
 
     const handleOrderSaved = (order: ServiceOrder) => {
-        saveServiceOrder(order); 
+        saveServiceOrder(order);
         setIsOrderModalOpen(false);
         toast({
             title: "Ordem de Serviço Criada!",
@@ -224,10 +224,10 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                         <div className="lg:col-span-2 space-y-4">
                             <Card>
                                 <CardHeader>
-                                <CardTitle>Identificação do Equipamento</CardTitle>
-                                <CardDescription>
-                                    Informações técnicas para rastreabilidade.
-                                </CardDescription>
+                                    <CardTitle>Identificação do Equipamento</CardTitle>
+                                    <CardDescription>
+                                        Informações técnicas para rastreabilidade.
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -454,7 +454,7 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                         </div>
 
                         <div className="lg:col-span-1 space-y-4">
-                             <Card>
+                            <Card>
                                 <CardHeader>
                                     <CardTitle>Disponibilidade e Status</CardTitle>
                                     <CardDescription>
@@ -519,12 +519,12 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                                 <CardFooter className="flex-col gap-2 items-stretch">
                                     <Button type="submit" size="lg" disabled={isSubmitting}>{isSubmitting ? "Salvando..." : "Criar Equipamento"}</Button>
                                     <Button type="button" variant="outline" size="lg" onClick={handleCancelClick} disabled={isSubmitting}>Cancelar</Button>
-                                     {!isModal && (
+                                    {!isModal && (
                                         <>
                                             <Separator className="my-2" />
                                             <Button type="button" variant="secondary" size="lg" onClick={handleSaveAndCreateOS} disabled={isSubmitting}>Criar e Abrir OS</Button>
                                         </>
-                                     )}
+                                    )}
                                 </CardFooter>
                             </Card>
                         </div>
@@ -541,15 +541,15 @@ export default function EquipmentForm({ isModal = false, defaultOwnerId, onSave,
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex-grow overflow-auto pr-6 -mr-6">
-                       {newlyCreatedEquipment && (
-                         <OrderForm
-                            defaultClientId={newlyCreatedEquipment.ownerId}
-                            defaultEquipmentId={newlyCreatedEquipment.id}
-                            onSave={handleOrderSaved}
-                            onCancel={() => setIsOrderModalOpen(false)}
-                            isModal={true}
-                        />
-                       )}
+                        {newlyCreatedEquipment && (
+                            <OrderForm
+                                defaultClientId={newlyCreatedEquipment.ownerId}
+                                defaultEquipmentId={newlyCreatedEquipment.id}
+                                onSave={handleOrderSaved}
+                                onCancel={() => setIsOrderModalOpen(false)}
+                                isModal={true}
+                            />
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

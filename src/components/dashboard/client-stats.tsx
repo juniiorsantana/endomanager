@@ -17,34 +17,34 @@ interface ClientStatsProps {
 }
 
 export default function ClientStats({ clientData }: ClientStatsProps) {
-    const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([]);
+  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([]);
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            const orders = await getServiceOrders();
-            setServiceOrders(orders);
-        };
-        fetchOrders();
-    }, []);
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const orders = await getServiceOrders();
+      setServiceOrders(orders);
+    };
+    fetchOrders();
+  }, []);
 
-    const activeClientsLastYear = new Set(
-        serviceOrders
-            .filter(o => new Date(o.entryDate) > new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
-            .map(o => o.clientId)
-    ).size;
+  const activeClientsLastYear = new Set(
+    serviceOrders
+      .filter(o => new Date(o.entryDate) > new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
+      .map(o => o.clientId)
+  ).size;
 
-    const clientsWithOpenOrders = new Set(
-        serviceOrders
-            .filter(o => o.status === "In Progress" || o.status === "Open" || o.status === "In Diagnosis")
-            .map(o => o.clientId)
-    ).size;
+  const clientsWithOpenOrders = new Set(
+    serviceOrders
+      .filter(o => o.status === "Em Andamento" || o.status === "Aberta" || o.status === "Em Diagnóstico")
+      .map(o => o.clientId)
+  ).size;
 
-    const stats = [
-        { title: "Clientes Ativos", value: clientData.length, icon: Users, color: "text-blue-500", bgColor: "bg-blue-50 dark:bg-blue-900/20" },
-        { title: "Com OS (12 meses)", value: activeClientsLastYear, icon: Briefcase, color: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20" },
-        { title: "Com OS em Andamento", value: clientsWithOpenOrders, icon: BarChart, color: "text-orange-500", bgColor: "bg-orange-50 dark:bg-orange-900/20" },
-        { title: "Novos Clientes (Mês)", value: "2", icon: UserPlus, color: "text-cyan-500", bgColor: "bg-cyan-50 dark:bg-cyan-900/20" },
-    ];
+  const stats = [
+    { title: "Clientes Ativos", value: clientData.length, icon: Users, color: "text-blue-500", bgColor: "bg-blue-50 dark:bg-blue-900/20" },
+    { title: "Com OS (12 meses)", value: activeClientsLastYear, icon: Briefcase, color: "text-green-500", bgColor: "bg-green-50 dark:bg-green-900/20" },
+    { title: "Com OS em Andamento", value: clientsWithOpenOrders, icon: BarChart, color: "text-orange-500", bgColor: "bg-orange-50 dark:bg-orange-900/20" },
+    { title: "Novos Clientes (Mês)", value: "2", icon: UserPlus, color: "text-cyan-500", bgColor: "bg-cyan-50 dark:bg-cyan-900/20" },
+  ];
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -56,7 +56,7 @@ export default function ClientStats({ clientData }: ClientStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stat.value}</div>
-             <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Clique para ver detalhes
             </p>
           </CardContent>

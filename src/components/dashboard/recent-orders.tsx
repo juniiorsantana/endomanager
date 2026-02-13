@@ -49,6 +49,7 @@ const statusStyles: { [key in ServiceOrderStatus]: string } = {
   Finalizada: "bg-green-100 text-green-800 border-green-200",
   Entregue: "bg-gray-100 text-gray-800 border-gray-200",
   "Em Diagnóstico": "bg-cyan-100 text-cyan-800 border-cyan-200",
+  Arquivada: "bg-gray-100 text-gray-800 border-gray-200",
 };
 
 export default function RecentOrders() {
@@ -73,7 +74,7 @@ export default function RecentOrders() {
           getClients(),
           getEquipment(),
         ]);
-        const sortedOrders = orders.sort((a,b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime());
+        const sortedOrders = orders.sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime());
         setRecentOrders(sortedOrders.slice(0, 5));
         setClients(clientsData);
         setEquipment(equipmentData);
@@ -139,7 +140,7 @@ export default function RecentOrders() {
             <TableBody>
               {isDataLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                   <TableRow key={index}>
+                  <TableRow key={index}>
                     <TableCell>
                       <Skeleton className="h-5 w-24 mb-1" />
                       <Skeleton className="h-4 w-16" />
@@ -194,7 +195,7 @@ export default function RecentOrders() {
           </Table>
         </CardContent>
       </Card>
-      
+
       <Dialog open={isSummaryDialogOpen} onOpenChange={setIsSummaryDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -226,11 +227,11 @@ export default function RecentOrders() {
 
       {selectedOrder && (
         <OrderDetails
-            isOpen={isDetailsModalOpen}
-            onOpenChange={setIsDetailsModalOpen}
-            order={selectedOrder}
-            client={clients.find(c => c.id === selectedOrder.clientId)}
-            equipment={equipment.find(e => e.id === selectedOrder.equipmentId)}
+          isOpen={isDetailsModalOpen}
+          onOpenChange={setIsDetailsModalOpen}
+          order={selectedOrder}
+          client={clients.find(c => c.id === selectedOrder.clientId)}
+          equipment={equipment.find(e => e.id === selectedOrder.equipmentId)}
         />
       )}
     </>
