@@ -37,86 +37,91 @@ const navLinks = [
   { href: "/dashboard/reports", icon: BarChart3, label: "Relatórios" },
 ];
 
-const NavContent = () => {
-    const pathname = usePathname();
-    const router = useRouter();
+const NavContent = ({ onNavigate }: { onNavigate?: () => void }) => {
+  const pathname = usePathname();
+  const router = useRouter();
 
-    const handleLogout = async () => {
-        try {
-        await signOut(auth);
-        router.push("/");
-        } catch (error) {
-        console.error("Error signing out: ", error);
-        }
-    };
-    
-    return (
-        <>
-         <nav className="grid gap-2 text-lg font-medium">
-            {navLinks.map((link) => (
-            <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                    "flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                    pathname === link.href && "bg-accent text-accent-foreground"
-                )}
-                >
-                <link.icon className="h-5 w-5" />
-                {link.label}
-            </Link>
-            ))}
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
+
+  return (
+    <>
+      <nav className="grid gap-2 text-lg font-medium">
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            onClick={onNavigate}
+            className={cn(
+              "flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+              pathname === link.href && "bg-accent text-accent-foreground"
+            )}
+          >
+            <link.icon className="h-5 w-5" />
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+      <div className="mt-auto">
+        <nav className="grid gap-2 text-lg font-medium">
+          <Link
+            href="/dashboard/settings"
+            onClick={onNavigate}
+            className={cn(
+              "flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+              pathname === "/dashboard/settings" && "bg-accent text-accent-foreground"
+            )}
+          >
+            <Settings className="h-5 w-5" />
+            Configurações
+          </Link>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary justify-start"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-5 w-5" />
+            Sair
+          </Button>
         </nav>
-         <div className="mt-auto">
-             <nav className="grid gap-2 text-lg font-medium">
-                  <Link
-                    href="/dashboard/settings"
-                    className={cn(
-                        "flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                        pathname === "/dashboard/settings" && "bg-accent text-accent-foreground"
-                    )}
-                    >
-                    <Settings className="h-5 w-5" />
-                    Configurações
-                </Link>
-                 <Button
-                    variant="ghost"
-                    className="flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary justify-start"
-                    onClick={handleLogout}
-                >
-                    <LogOut className="h-5 w-5" />
-                    Sair
-                </Button>
-            </nav>
-        </div>
-        </>
-    )
+      </div>
+    </>
+  )
 };
 
 
 export const MobileSidebar = () => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Sheet>
-        <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="sm:hidden">
-            <PanelLeft className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs flex flex-col">
-            <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
-            <Link
-                href="/dashboard"
-                className="group flex h-16 items-center gap-2 border-b text-lg font-semibold"
-                >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <CircleDot className="h-5 w-5 transition-all group-hover:scale-110" />
-                </div>
-                <span className="text-lg font-bold text-primary">Endoscam</span>
-            </Link>
-            <NavContent />
-        </SheetContent>
-      </Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button size="icon" variant="outline" className="sm:hidden">
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Toggle Menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="sm:max-w-xs flex flex-col">
+        <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
+        <Link
+          href="/dashboard"
+          className="group flex h-16 items-center gap-2 border-b text-lg font-semibold"
+          onClick={() => setOpen(false)}
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <CircleDot className="h-5 w-5 transition-all group-hover:scale-110" />
+          </div>
+          <span className="text-lg font-bold text-primary">Endoscam</span>
+        </Link>
+        <NavContent onNavigate={() => setOpen(false)} />
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -170,10 +175,11 @@ export default function AppSidebar() {
             <span className="text-lg font-bold text-primary">Endoscam</span>
           )}
         </Link>
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn(!isSidebarOpen && "hidden")}>
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn("hidden sm:flex", !isSidebarOpen && "absolute -right-3 top-6 z-20 h-6 w-6 rounded-full border bg-background shadow-md")}>
           <ChevronLeft
             className={cn(
-              "h-5 w-5 transition-transform",
+              "h-4 w-4 transition-transform",
+              !isSidebarOpen && "rotate-180"
             )}
           />
         </Button>
@@ -215,8 +221,8 @@ export default function AppSidebar() {
                 className={cn(
                   "flex h-10 items-center gap-3 rounded-lg px-3 text-muted-foreground transition-colors hover:text-foreground",
                   pathname === "/dashboard/settings" &&
-                    "bg-accent text-accent-foreground",
-                   !isSidebarOpen && "justify-center"
+                  "bg-accent text-accent-foreground",
+                  !isSidebarOpen && "justify-center"
                 )}
               >
                 <Settings className="h-5 w-5 flex-shrink-0" />
@@ -234,11 +240,11 @@ export default function AppSidebar() {
                 className={cn(
                   "flex h-10 w-full items-center gap-3 rounded-lg px-3 text-muted-foreground transition-colors hover:text-foreground",
                   !isSidebarOpen && "justify-center"
-                  )}
+                )}
                 onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5 flex-shrink-0" />
-                 {isSidebarOpen && <span className="truncate">Sair</span>}
+                {isSidebarOpen && <span className="truncate">Sair</span>}
               </Button>
             </TooltipTrigger>
             {!isSidebarOpen && (
@@ -246,7 +252,7 @@ export default function AppSidebar() {
             )}
           </Tooltip>
         </TooltipProvider>
-         <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn("hidden", !isSidebarOpen ? "sm:flex w-full mt-2" : "sm:hidden")}>
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn("hidden", !isSidebarOpen ? "sm:flex w-full mt-2" : "sm:hidden")}>
           <ChevronLeft className="h-5 w-5 transition-transform rotate-180" />
         </Button>
       </div>

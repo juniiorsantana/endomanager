@@ -37,7 +37,7 @@ import { getClients, getEquipment, getServiceOrders, saveServiceOrder } from "@/
 import { Separator } from "../ui/separator";
 import ImageInspectionCanvas, { InspectionData as VisualInspectionData } from "./image-inspection-canvas";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "../ui/table";
-import { PlusCircle, Trash2, ChevronLeft, ChevronRight, History } from "lucide-react";
+import { PlusCircle, Trash2, ChevronLeft, ChevronRight, History, Check } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import type { ServiceOrder, Client, Equipment, ServiceOrderStatus, BudgetItem, InspectionChecklist, InspectionChecklistItem } from "@/types";
 import { inspectionItems } from "@/types";
@@ -290,44 +290,66 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <div className="flex items-center mb-4">
-                        <div className="flex items-center gap-2">
-                            {TABS.map((tab, index) => (
-                                <React.Fragment key={tab.id}>
-                                    <Button
-                                        type="button"
-                                        variant={currentTab === tab.id ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setCurrentTab(tab.id)}
-                                        className={cn(
-                                            "rounded-full",
-                                            index > currentTabIndex && "pointer-events-none opacity-50"
-                                        )}
-                                    >
-                                        {tab.name}
-                                    </Button>
-                                    {index < TABS.length - 1 && (
-                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                    )}
-                                </React.Fragment>
-                            ))}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-6">
+                        <div className="overflow-x-auto">
+                            <div className="flex items-center gap-2 min-w-max">
+                                {TABS.map((tab, index) => {
+                                    const isCompleted = index < currentTabIndex;
+                                    const isCurrent = currentTab === tab.id;
+                                    const isFuture = index > currentTabIndex;
+
+                                    return (
+                                        <React.Fragment key={tab.id}>
+                                            <Button
+                                                type="button"
+                                                variant={isCurrent ? "default" : "ghost"}
+                                                size="sm"
+                                                onClick={() => setCurrentTab(tab.id)}
+                                                className={cn(
+                                                    "rounded-sm whitespace-nowrap transition-all duration-200 ease-out",
+                                                    isCurrent && "shadow-md shadow-teal-500/20 ring-1 ring-teal-500/50",
+                                                    isCompleted && "bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-950/50",
+                                                    isFuture && "pointer-events-none opacity-50"
+                                                )}
+                                            >
+                                                {isCompleted && <Check className="h-3.5 w-3.5 mr-1.5" />}
+                                                <span className="text-xs font-medium tracking-wide">{tab.name}</span>
+                                            </Button>
+                                            {index < TABS.length - 1 && (
+                                                <ChevronRight className={cn(
+                                                    "h-4 w-4 flex-shrink-0 transition-colors duration-200",
+                                                    isCurrent || isCompleted ? "text-teal-500" : "text-muted-foreground"
+                                                )} />
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </div>
                         </div>
                         {!isModal && (
-                            <div className="ml-auto flex items-center gap-2">
-                                <Button variant="outline" type="button" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>
+                            <div className="flex sm:ml-auto">
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    disabled={isSubmitting}
+                                    className="transition-all duration-200 hover:scale-105"
+                                >
+                                    Cancelar
+                                </Button>
                             </div>
                         )}
                     </div>
 
                     <div style={{ display: currentTab === 'identification' ? 'block' : 'none' }}>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Identificação da OS</CardTitle>
-                                <CardDescription>
+                        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-sm">
+                            <CardHeader className="border-l-4 border-teal-500">
+                                <CardTitle className="text-base font-semibold tracking-wide">Identificação da OS</CardTitle>
+                                <CardDescription className="text-xs">
                                     Informações básicas sobre a ordem de serviço e o cliente.
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <FormField
                                         control={form.control}
@@ -376,7 +398,18 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Cliente</FormLabel>
-                                                <Select onValueChange={(value) => { field.onChange(value); form.setValue('equipmentId', '') }} value={field.value} disabled={!!defaultClientId && isModal}>
+                                                <Select
+                                                    onValueChange={(value) => {
+                                                        if (value === "new_client") {
+                                                            setIsClientModalOpen(true);
+                                                            return;
+                                                        }
+                                                        field.onChange(value);
+                                                        form.setValue('equipmentId', '');
+                                                    }}
+                                                    value={field.value}
+                                                    disabled={!!defaultClientId && isModal}
+                                                >
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Selecione um cliente" />
@@ -388,10 +421,13 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
                                                                 {client.companyName}
                                                             </SelectItem>
                                                         ))}
-                                                        <Separator />
-                                                        <Button variant="ghost" className="w-full justify-start pl-8 pr-2 h-auto py-1.5" onClick={(e) => { e.preventDefault(); setIsClientModalOpen(true) }}>
-                                                            <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Cliente
-                                                        </Button>
+                                                        <Separator className="my-1" />
+                                                        <SelectItem value="new_client" className="cursor-pointer font-medium text-primary focus:bg-primary/10 focus:text-primary">
+                                                            <div className="flex items-center">
+                                                                <PlusCircle className="mr-2 h-4 w-4" />
+                                                                Adicionar Cliente
+                                                            </div>
+                                                        </SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -439,21 +475,31 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
                     </div>
 
                     <div style={{ display: currentTab === 'equipment' ? 'block' : 'none' }}>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Informações do Equipamento</CardTitle>
-                                <CardDescription>
+                        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-sm">
+                            <CardHeader className="border-l-4 border-teal-500">
+                                <CardTitle className="text-base font-semibold tracking-wide">Informações do Equipamento</CardTitle>
+                                <CardDescription className="text-xs">
                                     Detalhes sobre o equipamento em manutenção.
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="space-y-8">
                                 <FormField
                                     control={form.control}
                                     name="equipmentId"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Equipamento</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value} disabled={!selectedClientId || (!!defaultEquipmentId && isModal)}>
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    if (value === "new_equipment") {
+                                                        setIsEquipmentModalOpen(true);
+                                                        return;
+                                                    }
+                                                    field.onChange(value);
+                                                }}
+                                                value={field.value}
+                                                disabled={!selectedClientId || (!!defaultEquipmentId && isModal)}
+                                            >
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder={!selectedClientId ? "Selecione um cliente primeiro" : "Selecione um equipamento"} />
@@ -465,10 +511,13 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
                                                             {eq.brand} {eq.model} (S/N: {eq.serialNumber})
                                                         </SelectItem>
                                                     ))}
-                                                    <Separator />
-                                                    <Button variant="ghost" className="w-full justify-start pl-8 pr-2 h-auto py-1.5" onClick={(e) => { e.preventDefault(); setIsEquipmentModalOpen(true) }} disabled={!selectedClientId}>
-                                                        <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Equipamento
-                                                    </Button>
+                                                    <Separator className="my-1" />
+                                                    <SelectItem value="new_equipment" className="cursor-pointer font-medium text-primary focus:bg-primary/10 focus:text-primary" disabled={!selectedClientId}>
+                                                        <div className="flex items-center">
+                                                            <PlusCircle className="mr-2 h-4 w-4" />
+                                                            Adicionar Equipamento
+                                                        </div>
+                                                    </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -794,10 +843,16 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
                         </Card>
                     </div>
 
-                    <CardFooter className="flex justify-between mt-4">
+                    <CardFooter className="flex justify-between mt-6">
                         <div>
                             {currentTabIndex > 0 && (
-                                <Button variant="outline" type="button" onClick={handlePrevious} disabled={isSubmitting}>
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    onClick={handlePrevious}
+                                    disabled={isSubmitting}
+                                    className="transition-all duration-200 hover:scale-105"
+                                >
                                     <ChevronLeft className="mr-2 h-4 w-4" />
                                     Anterior
                                 </Button>
@@ -805,11 +860,19 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
                         </div>
                         <div>
                             {isLastStep ? (
-                                <Button type="submit" disabled={isSubmitting}>
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 shadow-md shadow-teal-500/30 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/40"
+                                >
                                     {isSubmitting ? "Salvando..." : "Criar Ordem de Serviço"}
                                 </Button>
                             ) : (
-                                <Button type="button" onClick={handleNext}>
+                                <Button
+                                    type="button"
+                                    onClick={handleNext}
+                                    className="transition-all duration-200 hover:scale-105"
+                                >
                                     Próximo
                                     <ChevronRight className="ml-2 h-4 w-4" />
                                 </Button>
@@ -820,28 +883,28 @@ export default function OrderForm({ defaultClientId, defaultEquipmentId, onSave,
             </Form>
 
             <Dialog open={isClientModalOpen} onOpenChange={setIsClientModalOpen}>
-                <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                <DialogContent className="!w-[95vw] !max-w-[95vw] sm:!max-w-4xl !max-h-[90vh] !overflow-y-auto !flex !flex-col !p-4 sm:!p-6 z-[100]">
                     <DialogHeader>
                         <DialogTitle>Adicionar Novo Cliente</DialogTitle>
                         <DialogDescription>
                             Preencha os dados abaixo para cadastrar um novo cliente.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex-grow overflow-auto pr-6 -mr-6">
+                    <div className="flex-grow overflow-auto sm:pr-6 sm:-mr-6">
                         <ClientForm isModal onSave={handleClientSaved} onCancel={() => setIsClientModalOpen(false)} />
                     </div>
                 </DialogContent>
             </Dialog>
 
             <Dialog open={isEquipmentModalOpen} onOpenChange={setIsEquipmentModalOpen}>
-                <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                <DialogContent className="!w-[95vw] !max-w-[95vw] sm:!max-w-4xl !max-h-[90vh] !overflow-y-auto !flex !flex-col !p-4 sm:!p-6 z-[100]">
                     <DialogHeader>
                         <DialogTitle>Adicionar Novo Equipamento</DialogTitle>
                         <DialogDescription>
                             OS para o cliente: {clients.find(c => c.id === selectedClientId)?.companyName}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex-grow overflow-auto pr-6 -mr-6">
+                    <div className="flex-grow overflow-auto sm:pr-6 sm:-mr-6">
                         {selectedClientId && (
                             <EquipmentForm
                                 isModal
