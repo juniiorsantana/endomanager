@@ -5,12 +5,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  projectId: "endosmanager",
-  appId: "1:646296770186:web:a1e6e69bc13cd968bfbf73",
-  storageBucket: "endosmanager.firebasestorage.app",
-  apiKey: "AIzaSyDflcS32FC865tAp2H0TgGozCHah-3TwhY",
-  authDomain: "endosmanager.firebaseapp.com",
-  messagingSenderId: "646296770186",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };
 
 // Initialize Firebase
